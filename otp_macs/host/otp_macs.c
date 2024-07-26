@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Analog Devices Inc.
+ * Copyright (c) 2024, Analog Devices Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,35 +25,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "adimem.h"
+#include <stdio.h>
+#include <string.h>
 
-#define TA_ADIMEM_UUID \
+#include "otp_macs.h"
+
+#define TA_OTP_MACS_UUID \
 	{ \
-		0x23fd8eb3, \
-		0xf9e6, 0x434c, \
+		0x61e8b041, \
+		0xc3bc, 0x4b70, \
 		{ \
-			0x94, 0xf2, \
-			0xa9, 0x1a, \
-			0x61, 0x38, \
-			0xbf, 0x3d, \
+			0xa9, 0x9e, \
+			0xd2, 0xe5, \
+			0xba, 0x2c, \
+			0x4e, 0xbf, \
 		} \
 	}
 
 /* Op parameter offsets */
-#define OP_PARAM_ADDR 0
-#define OP_PARAM_SIZE 1
-#define OP_PARAM_DATA 2
+#define OP_PARAM_INTERFACE      0
+#define OP_PARAM_MAC_VALUE      1
+
+/* The function IDs implemented in this TA */
+enum ta_otp_macs_cmds {
+	TA_OTP_MACS_CMD_READ,
+	TA_OTP_MACS_CMD_WRITE,
+	TA_OTP_MACS_CMDS_COUNT
+};
 
 /**
- * adi_readwrite_memory - Open a TEE session to read/write memory addresses
+ * adi_readwrite_otp_mac - Open a TEE session to read/write MAC addresses
  */
-TEEC_Result adi_readwrite_memory(enum ta_adimem_cmds command, uint64_t address, size_t size, uint32_t *rw_value)
+TEEC_Result adi_readwrite_otp_mac(enum ta_otp_macs_cmds command, uint8_t interface, uint8_t *mac)
 {
 	TEEC_Result res;
 	TEEC_Context ctx;
 	TEEC_Session sess;
 	TEEC_Operation op;
-	TEEC_UUID uuid = TA_ADIMEM_UUID;
+	TEEC_UUID uuid = TA_OTP_MACS_UUID;
 	uint32_t err_origin;
 
 	/* Initialize a context connecting us to the TEE */
@@ -73,21 +82,37 @@ TEEC_Result adi_readwrite_memory(enum ta_adimem_cmds command, uint64_t address, 
 
 	/* Prepare the TEEC_Operation struct */
 	memset(&op, 0, sizeof(op));
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_NONE);
-	op.params[OP_PARAM_ADDR].value.a = address;
-	op.params[OP_PARAM_SIZE].value.a = size;
-	op.params[OP_PARAM_DATA].value.a = *rw_value;
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_NONE, TEEC_NONE);
+	op.params[OP_PARAM_INTERFACE].value.a = interface;
+	op.params[OP_PARAM_MAC_VALUE].value.a = (mac[0] << 8) | mac[1];
+	op.params[OP_PARAM_MAC_VALUE].value.b = (mac[2] << 24) | (mac[3] << 16) | (mac[4] << 8) | mac[5];
 
 	/* Invoke the function */
 	res = TEEC_InvokeCommand(&sess, command, &op, &err_origin);
-	if (res != TEEC_SUCCESS)
-		printf("tee_readwrite_memory failed with code 0x%x origin 0x%x\n", res, err_origin);
-	else
-		*rw_value = op.params[OP_PARAM_DATA].value.a;
+	if (res != TEEC_SUCCESS) {
+		printf("adi_readwrite_otp_mac failed with code 0x%x origin 0x%x\n", res, err_origin);
+	} else {
+		mac[0] = (op.params[OP_PARAM_MAC_VALUE].value.a >> 8) & 0xFF;
+		mac[1] = (op.params[OP_PARAM_MAC_VALUE].value.a >> 0) & 0xFF;
+		mac[2] = (op.params[OP_PARAM_MAC_VALUE].value.b >> 24) & 0xFF;
+		mac[3] = (op.params[OP_PARAM_MAC_VALUE].value.b >> 16) & 0xFF;
+		mac[4] = (op.params[OP_PARAM_MAC_VALUE].value.b >> 8) & 0xFF;
+		mac[5] = (op.params[OP_PARAM_MAC_VALUE].value.b >> 0) & 0xFF;
+	}
 
 	/* Close the session and destroy the context */
 	TEEC_CloseSession(&sess);
 	TEEC_FinalizeContext(&ctx);
 
 	return res;
+}
+
+TEEC_Result adi_read_otp_mac(uint8_t interface, uint8_t *mac)
+{
+	return adi_readwrite_otp_mac(TA_OTP_MACS_CMD_READ, interface, mac);
+}
+
+TEEC_Result adi_write_otp_mac(uint8_t interface, uint8_t *mac)
+{
+	return adi_readwrite_otp_mac(TA_OTP_MACS_CMD_WRITE, interface, mac);
 }

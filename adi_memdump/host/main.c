@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Analog Devices Inc.
+ * Copyright (c) 2024, Analog Devices Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,18 +25,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ADIMEM_H
-#define ADIMEM_H
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <tee_client_api.h>
+#include "adi_memdump.h"
 
-/* The function IDs implemented in this TA */
-enum ta_adimem_cmds {
-	TA_ADIMEM_CMD_READ,
-	TA_ADIMEM_CMD_WRITE,
-	TA_ADIMEM_CMDS_COUNT
-};
+/* Command line arguments */
+#define ARG_RECORD 1
 
-TEEC_Result adi_readwrite_memory(enum ta_adimem_cmds command, uint64_t address, size_t size, uint32_t *rw_value);
+/* Command help */
+#define HELP "\n\
+Usage:  [record number] \n\
+  - record number: number of record to memdump to /tmp/memdump.bin \n\
+  - if record number not provided, will return total number of records \n\
+\n"
 
-#endif /* ADIMEM_H */
+bool parse_value32(char *data, uint32_t *value);
+
+/* MAIN */
+int main(int argc, char *argv[])
+{
+	uint32_t cmd_record_num = 0;
+	int res = 1;
+
+	if (argc == 1) {
+		/* If no additional arguments, get number of records */
+		if (adi_memdump_get_num_records() != TEEC_SUCCESS)
+			return 1;
+		else
+			return 0;
+	} else if (argc == 2) {
+		/* If record number provided, get memdump for record */
+		if (!parse_value32(argv[ARG_RECORD], &cmd_record_num)) {
+			printf("Invalid record number '%s'.\n", argv[ARG_RECORD]);
+			return 1;
+		}
+		if (adi_memdump(cmd_record_num) != TEEC_SUCCESS)
+			return 1;
+		else
+			return 0;
+	} else {
+		printf(HELP);
+		return 1;
+	}
+
+	return 1;
+}
+
+/**
+ * parse_value32 - gets uint32_t from string
+ */
+bool parse_value32(char *data, uint32_t *value)
+{
+	char *end;
+
+	*value = strtol(data, &end, 0);
+	if (*end != '\0') return 0;
+	return 1;
+}

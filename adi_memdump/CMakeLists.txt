@@ -1,6 +1,6 @@
-project (optee_app_adimem C)
+project (optee_app_adi_memdump C)
 
-set (SRC host/adimem.c host/main.c)
+set (SRC host/adi_memdump.c host/main.c)
 
 add_executable (${PROJECT_NAME} ${SRC})
 
@@ -10,4 +10,4 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries (${PROJECT_NAME} PRIVATE teec)
 
-install (TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug)
+install (TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Analog Devices Inc.
+ * Copyright (c) 2024, Analog Devices Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,18 +25,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ADIMEM_H
-#define ADIMEM_H
+#ifndef OTP_MACS_H
+#define OTP_MACS_H
 
 #include <tee_client_api.h>
 
-/* The function IDs implemented in this TA */
-enum ta_adimem_cmds {
-	TA_ADIMEM_CMD_READ,
-	TA_ADIMEM_CMD_WRITE,
-	TA_ADIMEM_CMDS_COUNT
-};
+#define NUM_MAC_ADDRESSES   6   /* Number of different MAC addresses to store */
 
-TEEC_Result adi_readwrite_memory(enum ta_adimem_cmds command, uint64_t address, size_t size, uint32_t *rw_value);
+TEEC_Result adi_read_otp_mac(uint8_t interface, uint8_t *mac);
+TEEC_Result adi_write_otp_mac(uint8_t interface, uint8_t *mac);
 
-#endif /* ADIMEM_H */
+#endif /* OTP_MACS_H */

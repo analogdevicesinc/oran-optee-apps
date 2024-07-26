@@ -68,3 +68,8 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Yocto symlinks
+oe-logs
+oe-workdir
+
