@@ -25,6 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <unistd.h>
 #include "adimem.h"
 
 #define TA_ADIMEM_UUID \
@@ -43,6 +44,7 @@
 #define OP_PARAM_ADDR 0
 #define OP_PARAM_SIZE 1
 #define OP_PARAM_DATA 2
+#define OP_PARAM_PRIV 3
 
 /**
  * adi_readwrite_memory - Open a TEE session to read/write memory addresses
@@ -73,10 +75,22 @@ TEEC_Result adi_readwrite_memory(enum ta_adimem_cmds command, uint64_t address, 
 
 	/* Prepare the TEEC_Operation struct */
 	memset(&op, 0, sizeof(op));
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_VALUE_INPUT);
 	op.params[OP_PARAM_ADDR].value.a = address;
 	op.params[OP_PARAM_SIZE].value.a = size;
 	op.params[OP_PARAM_DATA].value.a = *rw_value;
+
+	/* If application is running as root, flag this as a "privileged" access to the adimem TA.
+	 * adimem TA will only respect this flag if all of the following are true:
+	 * 1) adimem TA is part of a debug build
+	 * 2) Device lifecycle state is pre-deployed
+	 *
+	 * Obviously an attacker could write a non-root host application that deliberately sets
+	 * the privileged flag. The TA checks listed above are intended to prevent an attacker
+	 * from exploiting this in a production image, or a debug image that is deployed in the field.
+	 * Also, users must be part of the "tee" user group in order to call OP-TEE TAs.
+	 */
+	op.params[OP_PARAM_PRIV].value.a = (geteuid() == 0) ? 1 : 0;
 
 	/* Invoke the function */
 	res = TEEC_InvokeCommand(&sess, command, &op, &err_origin);
