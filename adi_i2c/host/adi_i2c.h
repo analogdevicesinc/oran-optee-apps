@@ -33,10 +33,12 @@
 /* The function IDs implemented in this TA */
 enum ta_adimem_cmds {
 	TA_ADI_I2C_GET,
-	TA_ADI_I2C_SET
+	TA_ADI_I2C_SET,
+	TA_ADI_I2C_SET_GET
 };
 
-TEEC_Result adi_i2c_get(uint64_t bus, uint64_t slave, uint64_t speed, uint64_t address, uint64_t length, uint64_t bytes);
+TEEC_Result adi_i2c_get(uint64_t bus, uint64_t slave, uint64_t speed, uint64_t address, uint64_t length, uint64_t bytes, uint8_t *buf);
 TEEC_Result adi_i2c_set(uint64_t bus, uint64_t slave, uint64_t speed, uint64_t address, uint64_t length, uint64_t bytes, uint8_t *buf);
+TEEC_Result adi_i2c_set_get(uint64_t bus, uint64_t slave, uint64_t speed, uint64_t address, uint64_t length, uint64_t bytes, uint64_t read_bytes, uint8_t *buf);
 
 #endif /* ADI_I2C_H */
