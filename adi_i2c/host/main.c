@@ -38,14 +38,17 @@
 #define HELP "\n\
 Usage: \n\
   get <b> <s> <sp> <a> <l> <n> [-f <path>]\n\
-  - Reads (dec)<n> bytes from address (hex)<a> (<l> address length) of slave (hex)<s> in I2C bus <b> with speed <sp> (kHz)\n\
+  - Reads (dec)<n> bytes from address (hex)<a> (<l> address length) of slave (hex)<s> in I2C bus <b> with speed <sp> (Hz)\n\
     Values are written to the file specified by <path> if -f <path> is provided\n\
+	Supports I2C speed 21 kHz to 400 kHz\n\
   set <b> <s> <sp> <a> <l> <n> [ <b1> ... <bn> | -f <path> ]\n\
   - Writes (dec)<n> bytes (hex)<bX> or from file specified by <path> to address (hex)<a> (<l> address length) of slave (hex)<s>\n\
-    in I2C with speed <sp> (kHz)\n\
+    in I2C with speed <sp> (Hz)\n\
+	Supports I2C speed 21 kHz to 400 kHz\n\
   set-get <b> <s> <sp> <a> <l> <n1> <n2> -f <path> \n\
   - Writes (dec)<n1> bytes (hex)<bX> or from file specified by <path> to address (hex)<a> (<l> address length) of slave (hex)<s>\n\
-    in I2C with speed <sp> (kHz) and reads back (dec)<n2> bytes\n\
+    in I2C with speed <sp> (Hz) and reads back (dec)<n2> bytes\n\
+	Supports I2C speed 21 kHz to 400 kHz\n\
 \n"
 
 #define ARG_I2C_COMMAND 1
