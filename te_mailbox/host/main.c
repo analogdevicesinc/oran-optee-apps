@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Analog Devices Inc.
+ * Copyright (c) 2025, Analog Devices Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ Usage: [command] [arguments] \n\
   --prov-host-keys: [key id] [key length] [key] \n\
   --prov-prepare-finalize:    no arguments \n\
   --prov-finalize:    no arguments \n\
+  --bootflow-reg-read:		no arguments \n\
 \n"
 
 /* Functions definition */
@@ -121,6 +122,9 @@ int main(int argc, char *argv[])
 
 		/* Call TA to execute provision finalize mailbox API */
 		if (te_mailbox(PROV_FINALIZE_CMD) == TEEC_SUCCESS)
+			return 0;
+	} else if (strcmp(argv[1], "--bootflow-reg-read") == 0) {
+		if (te_mailbox(BOOT_FLOW_REG_READ) == TEEC_SUCCESS)
 			return 0;
 	} else {
 		printf(HELP);

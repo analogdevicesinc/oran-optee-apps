@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Analog Devices Inc.
+ * Copyright (c) 2025, Analog Devices Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,9 @@
 		} \
 	}
 
+/* Parameters for BOOT_FLOW_REG_READ */
+#define OP_PARAM_BOOT_FLOW              0
+
 TEEC_Result te_mailbox(uint32_t cmd)
 {
 	TEEC_Result res;
@@ -68,13 +71,21 @@ TEEC_Result te_mailbox(uint32_t cmd)
 
 	/* Prepare the TEEC_Operation struct */
 	memset(&op, 0, sizeof(op));
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+
+	if (cmd == BOOT_FLOW_REG_READ)
+		op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_OUTPUT, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+	else
+		op.paramTypes = TEEC_PARAM_TYPES(TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
 
 	/* Invoke the function */
-	printf("Invoking te mailbox TA cmd %d\n", cmd);
 	res = TEEC_InvokeCommand(&sess, cmd, &op, &err_origin);
 	if (res != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x", res, err_origin);
+
+	if (cmd == BOOT_FLOW_REG_READ) {
+		printf("TE BootROM Flow Register 0: %08x\n", op.params[0].value.a);
+		printf("TE BootROM Flow Register 1: %08x\n", op.params[0].value.b);
+	}
 
 	/* Close the session and destroy the context */
 
