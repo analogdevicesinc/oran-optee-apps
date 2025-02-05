@@ -191,14 +191,10 @@ int main(void)
 		errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x", res, err_origin);
 	} else {
 		/* On success, print out BL31 and OP-TEE logs */
-		if (strlen(optee_data) != 0) {
-			printf("OP-TEE Buffer\n");
+		if (strlen(optee_data) != 0)
 			print_buffer(optee_data, optee_size);
-		}
-		if (strlen(bl31_data) != 0) {
-			printf("BL31 Buffer\n");
+		if (strlen(bl31_data) != 0)
 			print_buffer(bl31_data, bl31_size);
-		}
 	}
 
 	/* Free buffers, release shared memory, close the session, and destroy the context */
