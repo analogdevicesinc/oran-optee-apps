@@ -48,8 +48,9 @@
 	}
 
 /* Op parameter offsets */
-#define OP_PARAM_TEMP_GROUP_ID   0
-#define OP_PARAM_TEMP_VALUE      1
+#define OP_PARAM_TEMP_GROUP_ID  0
+#define OP_PARAM_TEMP_VALUE     1
+#define OP_PARAM_TILE   2
 
 /* The function IDs implemented in this TA */
 typedef enum ta_otp_temp_cmds {
@@ -87,9 +88,17 @@ static TEEC_Result adi_readwrite_otp_temp(ta_otp_temp_cmds_t command, adrv906x_t
 
 	/* Prepare the TEEC_Operation struct */
 	memset(&op, 0, sizeof(op));
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_NONE, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_VALUE_INPUT, TEEC_NONE);
 	op.params[OP_PARAM_TEMP_GROUP_ID].value.a = temp_group_id;
 	op.params[OP_PARAM_TEMP_VALUE].value.a = *value;
+
+	/* Set the tile based on the  */
+	if (temp_group_id >= SECONDARY_OFFSET) {
+		op.params[OP_PARAM_TEMP_GROUP_ID].value.a = temp_group_id - SECONDARY_OFFSET;
+		op.params[OP_PARAM_TILE].value.a = 1;
+	} else {
+		op.params[OP_PARAM_TILE].value.a = 0;
+	}
 
 	/* Invoke the function */
 	res = TEEC_InvokeCommand(&sess, command, &op, &err_origin);

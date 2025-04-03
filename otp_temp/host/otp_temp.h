@@ -36,8 +36,18 @@ typedef enum {
 	TEMP_SENSOR_RF0_1_PLL		= 1,
 	TEMP_SENSOR_TX0_1		= 2,
 	TEMP_SENSOR_TX2_3		= 3,
-	TEMP_SENSOR_OTP_SLOT_NUM	= 4,
+	TEMP_SENSOR_PLL_SLOPE		= 4,
+	TEMP_SENSOR_TX_SLOPE		= 5,
+	SEC_TEMP_SENSOR_CLK_ETH_PLL	= 6,
+	SEC_TEMP_SENSOR_RF0_1_PLL	= 7,
+	SEC_TEMP_SENSOR_TX0_1		= 8,
+	SEC_TEMP_SENSOR_TX2_3		= 9,
+	SEC_TEMP_SENSOR_PLL_SLOPE	= 10,
+	SEC_TEMP_SENSOR_TX_SLOPE	= 11,
+	TEMP_SENSOR_OTP_SLOT_NUM	= 12
 } adrv906x_temp_group_id_t;
+
+#define SECONDARY_OFFSET SEC_TEMP_SENSOR_CLK_ETH_PLL
 
 TEEC_Result adi_read_otp_temp(adrv906x_temp_group_id_t temp_chan, uint32_t *value);
 TEEC_Result adi_write_otp_temp(adrv906x_temp_group_id_t temp_chan, uint32_t *value);

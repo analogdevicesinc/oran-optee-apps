@@ -38,12 +38,20 @@
 #define HELP "\n\
 Usage: \n\
   ./optee_app_otp_temp_read {temp_sensor_group_id} \n\
-  \n\
+\n\
   temp_sensor_group_id (u32 hex): \n\
-    0 -- TEMP_SENSOR_CLK_ETH_PLL	  \n\
-    1 -- TEMP_SENSOR_RF0_1_PLL   \n\
-    2 -- TEMP_SENSOR_TX0_1  \n\
-    3 -- TEMP_SENSOR_TX2_3  \n\
+    0  -- TEMP_SENSOR_CLK_ETH_PLL   	\n\
+    1  -- TEMP_SENSOR_RF0_1_PLL     	\n\
+    2  -- TEMP_SENSOR_TX0_1         	\n\
+    3  -- TEMP_SENSOR_TX2_3         	\n\
+    4  -- TEMP_SENSOR_PLL_SLOPE     	\n\
+    5  -- TEMP_SENSOR_TX_SLOPE      	\n\
+    6  -- SEC_TEMP_SENSOR_CLK_ETH_PLL   \n\
+    7  -- SEC_TEMP_SENSOR_RF0_1_PLL     \n\
+    8  -- SEC_TEMP_SENSOR_TX0_1         \n\
+    9  -- SEC_TEMP_SENSOR_TX2_3         \n\
+   10  -- SEC_TEMP_SENSOR_PLL_SLOPE     \n\
+   11  -- SEC_TEMP_SENSOR_TX_SLOPE      \n\
 \n"
 
 /* Functions definition */
