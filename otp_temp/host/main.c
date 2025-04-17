@@ -37,7 +37,7 @@
 /* Command help */
 #define HELP "\n\
 Usage: \n\
-  ./optee_app_otp_temp_read {temp_sensor_group_id} \n\
+  ./optee_app_otp_temp_read <group_id> [group_id] ... \n\
 \n\
   temp_sensor_group_id (u32 hex): \n\
     0  -- TEMP_SENSOR_CLK_ETH_PLL   	\n\
@@ -60,34 +60,59 @@ bool parse_value32(char *data, uint32_t *value);
 /* MAIN */
 int main(int argc, char *argv[])
 {
-	bool ret;
-	uint32_t value;
-	uint32_t temp_group_id_input;
+	int status = 0;
+	bool ret = false;
+	unsigned int i = 0;
+	unsigned int group_count = argc - ARG_TEMP_GROUP;
+	uint32_t *values = NULL;
+	uint32_t *group_ids = NULL;
 
 	/* Check if arguments provided */
-	if (argc != 2) {
-		printf("Error: Too many arguments provided.\n");
-		printf(HELP);
-		return 1;
+	if (group_count == 0) {
+		fprintf(stderr, "Error: At least one group_id must be provided.\n");
+		fprintf(stderr, HELP);
+		status = 1;
+		goto exit;
+	}
+
+	values = malloc(sizeof(uint32_t) * group_count);
+	group_ids = malloc(sizeof(uint32_t) * group_count);
+	if (!values || !group_ids) {
+		fprintf(stderr, "Error: Memory allocation failed.\n");
+		status = 1;
+		goto exit;
 	}
 
 	/* Parse interface */
-	ret = parse_value32(argv[ARG_TEMP_GROUP], &temp_group_id_input);
-	if (!ret || temp_group_id_input >= TEMP_SENSOR_OTP_SLOT_NUM) {
-		printf("Error: Invalid temp_group_id '%s'.\n", argv[ARG_TEMP_GROUP]);
-		printf(HELP);
-		return 1;
+	for (i = 0; i < group_count; i++) {
+		const char *arg = argv[ARG_TEMP_GROUP + i];
+		ret = parse_value32(arg, &group_ids[i]);
+		if (!ret) {
+			fprintf(stderr, "Error: Invalid group_id '%s'.\n", arg);
+			fprintf(stderr, HELP);
+			status = 1;
+			goto exit;
+		}
 	}
 
 	/* Read TEMP slope or offset from OTP */
-	if (adi_read_otp_temp((adrv906x_temp_group_id_t)temp_group_id_input, &value) != TEEC_SUCCESS) {
-		printf("Error: failed reading otp temp data.\n");
-		return 1;
+	for (i = 0; i < group_count; i++) {
+		if (adi_read_otp_temp((adrv906x_temp_group_id_t)group_ids[i], &values[i]) != TEEC_SUCCESS) {
+			fprintf(stderr, "Error: failed reading otp temp data group_id '%u'.\n", group_ids[i]);
+			status = 1;
+			goto exit;
+		}
 	}
 
-	printf("OTP value of temp sensor group id %u: 0x%04x\n", temp_group_id_input, value);
+	for (i = 0; i < group_count; i++)
+		printf("group id %u: 0x%08x\n", group_ids[i], values[i]);
 
-	return 0;
+exit:
+	if (values)
+		free(values);
+	if (group_ids)
+		free(group_ids);
+	return status;
 }
 
 /**

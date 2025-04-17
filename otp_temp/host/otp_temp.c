@@ -74,14 +74,14 @@ static TEEC_Result adi_readwrite_otp_temp(ta_otp_temp_cmds_t command, adrv906x_t
 	/* Initialize a context connecting us to the TEE */
 	res = TEEC_InitializeContext(NULL, &ctx);
 	if (res != TEEC_SUCCESS) {
-		printf("TEEC_InitializeContext failed with code 0x%x\n", res);
+		fprintf(stderr, "TEEC_InitializeContext failed with code 0x%x\n", res);
 		return res;
 	}
 
 	/* Open a session to the TA. */
 	res = TEEC_OpenSession(&ctx, &sess, &uuid, TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
 	if (res != TEEC_SUCCESS) {
-		printf("TEEC_Opensession failed with code 0x%x origin 0x%x\n", res, err_origin);
+		fprintf(stderr, "TEEC_Opensession failed with code 0x%x origin 0x%x\n", res, err_origin);
 		TEEC_FinalizeContext(&ctx);
 		return res;
 	}
@@ -103,9 +103,9 @@ static TEEC_Result adi_readwrite_otp_temp(ta_otp_temp_cmds_t command, adrv906x_t
 	/* Invoke the function */
 	res = TEEC_InvokeCommand(&sess, command, &op, &err_origin);
 	if (res != TEEC_SUCCESS)
-		printf("TEEC-optee-app failed with code 0x%x origin 0x%x\n", res, err_origin);
+		fprintf(stderr, "TEEC-optee-app failed with code 0x%x origin 0x%x\n", res, err_origin);
 	else
-		*value = (op.params[OP_PARAM_TEMP_VALUE].value.a) & 0x7FFF7FFF;
+		*value = (op.params[OP_PARAM_TEMP_VALUE].value.a) & 0xFFFFFFFF;
 
 	/* Close the session and destroy the context */
 	TEEC_CloseSession(&sess);
