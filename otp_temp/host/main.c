@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	for (i = 0; i < group_count; i++) {
 		const char *arg = argv[ARG_TEMP_GROUP + i];
 		ret = parse_value32(arg, &group_ids[i]);
-		if (!ret) {
+		if (!ret || group_ids[i] >= TEMP_SENSOR_OTP_SLOT_NUM) {
 			fprintf(stderr, "Error: Invalid group_id '%s'.\n", arg);
 			fprintf(stderr, HELP);
 			status = 1;
