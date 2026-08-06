@@ -96,7 +96,7 @@ TEEC_Result adi_read_otp(uint32_t tile, uint32_t addr, uint32_t mask, uint32_t s
 
 	/* Prepare the TEEC_Operation struct */
 	memset(&op, 0, sizeof(op));
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INOUT, TEEC_VALUE_INPUT, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_VALUE_INPUT, TEEC_VALUE_INPUT, TEEC_VALUE_INPUT);
 	op.params[OP_PARAM_TILE].value.a = tile;
 	op.params[OP_PARAM_OFFSET].value.a = addr;
 	op.params[OP_PARAM_MASK].value.a = mask;
